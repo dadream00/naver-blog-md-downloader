@@ -2,85 +2,102 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>네이버 블로그 다운로더</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9ff;
+      font-family: "Pretendard", sans-serif;
+      background-color: #f4f4f8;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
     }
-    .container {
+    .card {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 40px;
       text-align: center;
-      width: 400px;
+      max-width: 480px;
+      width: 100%;
     }
     h1 {
-      color: #333;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 24px;
+      line-height: 1.4;
     }
     input {
+      padding: 12px;
       width: 100%;
-      padding: 10px;
-      margin: 15px 0;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 16px;
     }
     button {
-      background-color: #4a4cff;
+      background-color: #4f46e5;
       color: white;
+      padding: 12px 20px;
       border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.2s ease-in-out;
+      width: 100%;
     }
     button:hover {
-      background-color: #3737cc;
+      background-color: #4338ca;
     }
     .error {
+      margin-top: 16px;
+      font-size: 0.9rem;
       color: red;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="card">
     <h1>네이버 블로그 다운로더</h1>
-    <p>블로그 주소를 입력하면 제목+본문을 마크다운으로 저장합니다.</p>
-    <input type="text" id="url" placeholder="https://blog.naver.com/username/123456789" />
-    <button onclick="download()">📥 다운로드</button>
+    <p>블로그 주소를 입력하면 제목과 본문을 마크다운(.md) 파일로 저장합니다.</p>
+    <input type="text" id="url" placeholder="네이버 블로그 URL을 입력하세요" />
+    <button onclick="downloadMarkdown()">⬇ 다운로드</button>
     <div id="error" class="error"></div>
   </div>
 
   <script>
-    async function download() {
-      const url = document.getElementById("url").value.trim();
-      const errorDiv = document.getElementById("error");
-      errorDiv.textContent = "";
+    async function downloadMarkdown() {
+      const url = document.getElementById('url').value.trim();
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = '';
 
       if (!url) {
-        errorDiv.textContent = "URL을 입력하세요.";
+        errorDiv.textContent = '블로그 주소를 입력하세요.';
         return;
       }
 
       try {
         const res = await fetch(`/api/convert?url=${encodeURIComponent(url)}`);
-        if (!res.ok) throw new Error("변환 실패");
+        if (!res.ok) throw new Error('변환 실패');
+
         const blob = await res.blob();
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = "naver-blog.md";
+        a.download = 'naver_blog.md';
         document.body.appendChild(a);
         a.click();
         a.remove();
       } catch (err) {
-        errorDiv.textContent = "변환 실패. 주소를 확인하세요.";
+        errorDiv.textContent = '변환 실패: 주소를 확인하세요.';
       }
     }
   </script>
