@@ -3,40 +3,106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Naver Blog → Markdown</title>
+  <title>Naver Blog → Markdown 변환기</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    input { width: 70%; padding: 10px; font-size: 1rem; }
-    button { padding: 10px 20px; font-size: 1rem; margin-left: 5px; }
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #f5f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-top: 40px;
+      font-size: 2rem;
+      color: #2c3e50;
+    }
+    p {
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+    }
+    button {
+      background: #00c73c;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #009e31;
+    }
+    footer {
+      margin-top: auto;
+      font-size: 0.8rem;
+      color: #aaa;
+      padding: 20px 0;
+    }
   </style>
 </head>
 <body>
   <h1>📝 Naver Blog → Markdown 변환기</h1>
-  <p>네이버 블로그 글 주소를 입력하세요</p>
-  <input id="url" placeholder="https://blog.naver.com/아이디/글번호" />
-  <button onclick="downloadMarkdown()">변환 & 다운로드</button>
+  <p>네이버 블로그 글 주소를 입력하면, 본문만 Markdown 파일로 변환해 드립니다.</p>
+
+  <div class="input-group">
+    <input id="url" placeholder="https://blog.naver.com/아이디/글번호" />
+    <button onclick="downloadMarkdown()">변환</button>
+  </div>
+
+  <footer>© 2025 Naver Blog Markdown Downloader</footer>
 
   <script>
     async function downloadMarkdown() {
-      const url = document.getElementById('url').value;
-      if (!url) return alert("URL을 입력하세요!");
-      
-      const res = await fetch('/api/convert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-
-      if (!res.ok) {
-        alert("변환 실패!");
+      const url = document.getElementById('url').value.trim();
+      if (!url) {
+        alert("URL을 입력하세요!");
         return;
       }
+      
+      try {
+        const res = await fetch('/api/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
 
-      const blob = await res.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'post.md';
-      a.click();
+        if (!res.ok) {
+          const msg = await res.text();
+          alert("변환 실패: " + msg);
+          return;
+        }
+
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'post.md';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (error) {
+        alert("오류 발생: " + error.message);
+      }
     }
   </script>
 </body>
