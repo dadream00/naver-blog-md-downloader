@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Naver Blog → Markdown</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" integrity="sha512-tN+0XoR5qRKrMtsCM0Fq6dTRB0iB9z74KFxhNRLMNd9tYQhG05Cexkw8xzXNe/ly8ljZXwKcgv/hYMNnG8az5Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -39,7 +40,7 @@
       backdrop-filter: blur(10px);
       text-align: center;
       width: 100%;
-      max-width: 600px;
+      max-width: 800px;
     }
     input {
       width: 80%;
@@ -67,14 +68,13 @@
     }
     #preview {
       text-align: left;
-      background: rgba(0,0,0,0.7);
+      background: white;
+      color: black;
       padding: 15px;
       margin-top: 20px;
       border-radius: 10px;
-      white-space: pre-wrap;
-      font-family: monospace;
-      font-size: 0.9rem;
-      max-height: 300px;
+      font-size: 1rem;
+      max-height: 400px;
       overflow-y: auto;
     }
     footer {
@@ -97,11 +97,12 @@
     <button onclick="convertAndPreview()">변환하기</button>
     <button onclick="downloadMarkdown()" id="downloadBtn" style="display:none;">다운로드</button>
 
-    <div id="preview" style="display:none;"></div>
+    <article id="preview" class="markdown-body" style="display:none;"></article>
   </div>
 
   <footer>© 2025 Naver Blog MD Downloader</footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     let latestMarkdown = "";
 
@@ -122,7 +123,7 @@
       }
       latestMarkdown = await res.text();
       document.getElementById('preview').style.display = 'block';
-      document.getElementById('preview').textContent = latestMarkdown;
+      document.getElementById('preview').innerHTML = marked.parse(latestMarkdown);
       document.getElementById('downloadBtn').style.display = 'inline-block';
     }
 
