@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Naver Blog → Markdown</title>
+</head>
+<body>
+  <h1>네이버 블로그 → Markdown 변환기</h1>
+  <input id="url" placeholder="네이버 블로그 주소" size="50">
+  <button onclick="downloadMarkdown()">다운로드</button>
+
+  <script>
+    async function downloadMarkdown() {
+      const url = document.getElementById('url').value;
+      if (!url) {
+        alert("네이버 블로그 주소를 입력하세요");
+        return;
+      }
+      const res = await fetch('/api/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      if (!res.ok) {
+        alert("변환 실패!");
+        return;
+      }
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = window.URL.createObjectURL(blob);
+      a.download = 'post.md';
+      a.click();
+    }
+  </script>
+</body>
+</html>
