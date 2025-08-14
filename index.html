@@ -1,16 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Naver Blog → Markdown</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #74ABE2, #5563DE);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      color: white;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      margin: 0;
+    }
+    header span {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+    }
+    input {
+      width: 80%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #ffcc00;
+      color: #333;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #ffdb4d;
+      transform: scale(1.05);
+    }
+    #preview {
+      text-align: left;
+      background: rgba(0,0,0,0.7);
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 0.9rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    footer {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
-  <h1>네이버 블로그 → Markdown 변환기</h1>
-  <input id="url" placeholder="네이버 블로그 주소" size="50">
-  <button onclick="downloadMarkdown()">다운로드</button>
+  <header>
+    <span>📝</span>
+    <h1>Naver Blog → Markdown 변환기</h1>
+    <p>네이버 블로그 글 주소를 넣고 변환해보세요</p>
+  </header>
+
+  <div class="container">
+    <input id="url" placeholder="예: https://blog.naver.com/아이디/글번호" />
+    <br />
+    <button onclick="convertAndPreview()">변환하기</button>
+    <button onclick="downloadMarkdown()" id="downloadBtn" style="display:none;">다운로드</button>
+
+    <div id="preview" style="display:none;"></div>
+  </div>
+
+  <footer>© 2025 Naver Blog MD Downloader</footer>
 
   <script>
-    async function downloadMarkdown() {
+    let latestMarkdown = "";
+
+    async function convertAndPreview() {
       const url = document.getElementById('url').value;
       if (!url) {
         alert("네이버 블로그 주소를 입력하세요");
@@ -25,9 +120,16 @@
         alert("변환 실패!");
         return;
       }
-      const blob = await res.blob();
+      latestMarkdown = await res.text();
+      document.getElementById('preview').style.display = 'block';
+      document.getElementById('preview').textContent = latestMarkdown;
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }
+
+    function downloadMarkdown() {
+      const blob = new Blob([latestMarkdown], { type: "text/markdown" });
       const a = document.createElement('a');
-      a.href = window.URL.createObjectURL(blob);
+      a.href = URL.createObjectURL(blob);
       a.download = 'post.md';
       a.click();
     }
