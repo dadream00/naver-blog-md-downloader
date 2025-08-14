@@ -10,12 +10,12 @@ export default async function handler(req, res) {
       return;
     }
 
-    // 1. 블로그 첫 HTML 가져오기
+    // 첫 페이지 HTML 가져오기
     let html = await (await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
     })).text();
 
-    // 2. iframe 안에 본문이 있을 경우
+    // iframe 추출
     const iframeMatch = html.match(/<iframe[^>]+src="([^"]+)"/i);
     if (iframeMatch && iframeMatch[1]) {
       const iframeUrl = iframeMatch[1].startsWith('http')
@@ -26,8 +26,9 @@ export default async function handler(req, res) {
       })).text();
     }
 
-    // 3. 본문만 추출
     const $ = cheerio.load(html);
+
+    // 본문 추출
     let content = $('#postViewArea').html() || $('.se-main-container').html();
 
     if (!content) {
@@ -35,10 +36,9 @@ export default async function handler(req, res) {
       return;
     }
 
-    // 4. HTML → Markdown 변환
-    const markdown = NodeHtmlMarkdown.translate(content);
+    // 변환
+    const markdown = NodeHtmlMarkdown.translate(content || '');
 
-    // 5. 파일로 응답
     res.setHeader('Content-Disposition', 'attachment; filename="post.md"');
     res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
     res.send(markdown);
