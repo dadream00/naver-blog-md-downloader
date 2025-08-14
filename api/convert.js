@@ -1,27 +1,28 @@
-import cheerio from 'cheerio';
-import { NodeHtmlMarkdown } from 'node-html-markdown';
 import fetch from 'node-fetch';
+import { NodeHtmlMarkdown } from 'node-html-markdown';
+import cheerio from 'cheerio';
 
 export default async function handler(req, res) {
   try {
-    const { url } = req.body;
+    const { url } = req.query;
     if (!url) {
-      res.status(400).send('URL is required');
+      res.status(400).send('URL이 필요합니다.');
       return;
     }
 
-    let html = await (await fetch(url, {
+    const response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
-    })).text();
+    });
+    const html = await response.text();
 
-    const $ = cheerio.load(html);
-    const markdown = NodeHtmlMarkdown.translate($.html());
+    // 그냥 전체 HTML을 마크다운으로 변환
+    const markdown = NodeHtmlMarkdown.translate(html);
 
     res.setHeader('Content-Disposition', 'attachment; filename="post.md"');
     res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
-    res.send(markdown);
+    res.status(200).send(markdown);
   } catch (error) {
     console.error(error);
-    res.status(500).send('변환 실패: ' + error.message);
+    res.status(500).send(`변환 실패: ${error.message}`);
   }
 }
