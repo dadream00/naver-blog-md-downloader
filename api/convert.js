@@ -9,14 +9,24 @@ export default async function handler(req, res) {
         return res.status(400).send("URL이 필요합니다");
       }
 
-      // 네이버 블로그 HTML 가져오기
+      // 1. 블로그 메인 HTML 가져오기
       const html = await (await fetch(url)).text();
 
-      // HTML → Markdown 변환
-      const turndownService = new TurndownService();
-      const markdown = turndownService.turndown(html);
+      // 2. iframe 주소 찾기
+      let realHtml = html;
+      const iframeSrc = html.match(/<iframe[^>]+src="([^"]+)"/)?.[1];
+      if (iframeSrc) {
+        const fullIframeUrl = iframeSrc.startsWith("http")
+          ? iframeSrc
+          : `https://blog.naver.com${iframeSrc}`;
+        // 3. 실제 본문 HTML 가져오기
+        realHtml = await (await fetch(fullIframeUrl)).text();
+      }
 
-      // 파일로 다운로드
+      // 4. HTML → Markdown 변환
+      const turndownService = new TurndownService();
+      const markdown = turndownService.turndown(realHtml);
+
       res.setHeader(
         "Content-Disposition",
         'attachment; filename="naver-post.md"'
