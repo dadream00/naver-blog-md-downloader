@@ -52,4 +52,37 @@
 <body>
   <div class="container">
     <h1>네이버 블로그 다운로더</h1>
-    <p>블로그 주소를 입력하면 제
+    <p>블로그 주소를 입력하면 제목+본문을 마크다운으로 저장합니다.</p>
+    <input type="text" id="url" placeholder="https://blog.naver.com/username/123456789" />
+    <button onclick="download()">📥 다운로드</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <script>
+    async function download() {
+      const url = document.getElementById("url").value.trim();
+      const errorDiv = document.getElementById("error");
+      errorDiv.textContent = "";
+
+      if (!url) {
+        errorDiv.textContent = "URL을 입력하세요.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/convert?url=${encodeURIComponent(url)}`);
+        if (!res.ok) throw new Error("변환 실패");
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "naver-blog.md";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        errorDiv.textContent = "변환 실패. 주소를 확인하세요.";
+      }
+    }
+  </script>
+</body>
+</html>
