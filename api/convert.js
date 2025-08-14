@@ -9,14 +9,13 @@ export default async function handler(req, res) {
       return res.status(400).send("URL is required");
     }
 
-    // 1. 네이버 블로그 HTML 가져오기
+    // 1. 첫 페이지 HTML 가져오기
     const firstRes = await fetch(blogUrl, {
       headers: { "User-Agent": "Mozilla/5.0" }
     });
     const firstHtml = await firstRes.text();
-    const $first = load(firstHtml);
 
-    // 2. blogId & logNo 찾기
+    // 2. blogId & logNo 추출
     const blogIdMatch = firstHtml.match(/"blogId"\s*:\s*"(.+?)"/);
     const logNoMatch = firstHtml.match(/"logNo"\s*:\s*"(\d+)"/);
 
@@ -27,7 +26,7 @@ export default async function handler(req, res) {
     const blogId = blogIdMatch[1];
     const logNo = logNoMatch[1];
 
-    // 3. iframe URL 직접 생성
+    // 3. iframe URL 생성
     const iframeUrl = `https://blog.naver.com/PostView.nhn?blogId=${blogId}&logNo=${logNo}`;
 
     // 4. iframe HTML 가져오기
@@ -38,7 +37,8 @@ export default async function handler(req, res) {
     const $iframe = load(iframeHtml);
 
     // 5. 제목 + 본문 추출
-    const title = $iframe(".se_title, .pcol1, .htitle").first().text().trim();
+    const title =
+      $iframe(".se_title, .pcol1, .htitle").first().text().trim() || "제목 없음";
     const contentHtml = $iframe(".se-main-container, #postViewArea").html();
 
     if (!contentHtml) {
@@ -48,11 +48,10 @@ export default async function handler(req, res) {
     // 6. HTML → Markdown 변환
     const markdown = `# ${title}\n\n` + NodeHtmlMarkdown.translate(contentHtml);
 
-    // 7. 파일 응답
+    // 7. 파일 다운로드 응답
     res.setHeader("Content-Disposition", "attachment; filename=post.md");
     res.setHeader("Content-Type", "text/markdown; charset=utf-8");
     res.send(markdown);
-
   } catch (err) {
     console.error(err);
     res.status(500).send("변환 실패");
