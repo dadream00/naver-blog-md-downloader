@@ -1,56 +1,73 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>네이버 블로그 마크다운 다운로더</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 500px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-  <div class="bg-white shadow-lg rounded-xl p-8 max-w-md w-full text-center">
-    <h1 class="text-2xl font-bold mb-4">네이버 블로그<br>마크다운 다운로더</h1>
-    <input 
-      id="url" 
-      type="text" 
-      placeholder="네이버 블로그 URL 입력" 
-      class="border border-gray-300 rounded-md p-2 w-full mb-4"
-    >
-    <button 
-      id="download" 
-      class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-    >
-      다운로드
-    </button>
-    <p id="status" class="mt-4 text-sm text-gray-500"></p>
+<body>
+  <div class="container">
+    <h1>네이버 블로그 마크다운 다운로더</h1>
+    <input type="text" id="url" placeholder="네이버 블로그 URL 입력" />
+    <button onclick="downloadMarkdown()">다운로드</button>
   </div>
 
   <script>
-    document.getElementById('download').addEventListener('click', async () => {
-      const url = document.getElementById('url').value.trim();
-      const statusEl = document.getElementById('status');
-      if (!url) {
-        alert('URL을 입력하세요.');
-        return;
-      }
+    async function downloadMarkdown() {
+      const url = document.getElementById("url").value;
+      if (!url) return alert("URL을 입력하세요!");
 
-      statusEl.textContent = '변환 중... 잠시만 기다려주세요.';
+      const res = await fetch(`/api/convert?url=${encodeURIComponent(url)}`);
+      if (!res.ok) return alert("변환 실패!");
 
-      try {
-        const res = await fetch(`/api/convert?url=${encodeURIComponent(url)}`);
-        if (!res.ok) throw new Error('변환 실패');
-        const blob = await res.blob();
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'post.md';
-        link.click();
-        statusEl.textContent = '다운로드 완료!';
-      } catch (err) {
-        console.error(err);
-        alert(`변환 실패: ${err.message}`);
-        statusEl.textContent = '';
-      }
-    });
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "post.md";
+      a.click();
+    }
   </script>
 </body>
 </html>
