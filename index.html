@@ -3,105 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Naver Blog → Markdown 변환기</title>
+  <title>네이버 블로그 MD 다운로더</title>
   <style>
     body {
-      font-family: 'Pretendard', sans-serif;
-      background-color: #f5f7fa;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
+      height: 100vh;
       margin: 0;
-      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
     }
     h1 {
-      margin-top: 40px;
-      font-size: 2rem;
-      color: #2c3e50;
-    }
-    p {
-      color: #555;
+      font-size: 1.4em;
       margin-bottom: 20px;
+      color: #333;
     }
-    .input-group {
-      display: flex;
+    input[type="text"] {
       width: 100%;
-      max-width: 500px;
-      background: white;
+      padding: 10px;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    input {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      outline: none;
-      font-size: 1rem;
+      margin-bottom: 15px;
+      font-size: 14px;
     }
     button {
-      background: #00c73c;
+      background-color: #03c75a;
       color: white;
+      padding: 10px 15px;
       border: none;
-      padding: 12px 20px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s;
+      font-size: 14px;
     }
     button:hover {
-      background: #009e31;
+      background-color: #02a84b;
     }
-    footer {
-      margin-top: auto;
-      font-size: 0.8rem;
-      color: #aaa;
-      padding: 20px 0;
+    .footer {
+      font-size: 12px;
+      color: #888;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>📝 Naver Blog → Markdown 변환기</h1>
-  <p>네이버 블로그 글 주소를 입력하면, 본문만 Markdown 파일로 변환해 드립니다.</p>
-
-  <div class="input-group">
-    <input id="url" placeholder="https://blog.naver.com/아이디/글번호" />
-    <button onclick="downloadMarkdown()">변환</button>
+  <div class="container">
+    <h1>네이버 블로그<br>마크다운 다운로더</h1>
+    <input type="text" id="url" placeholder="블로그 URL을 입력하세요" />
+    <button onclick="downloadMarkdown()">다운로드</button>
+    <div class="footer">© 2025 Naver Blog MD Downloader</div>
   </div>
-
-  <footer>© 2025 Naver Blog Markdown Downloader</footer>
 
   <script>
     async function downloadMarkdown() {
-      const url = document.getElementById('url').value.trim();
+      const url = document.getElementById('url').value;
       if (!url) {
-        alert("URL을 입력하세요!");
+        alert('URL을 입력해주세요.');
         return;
       }
-      
       try {
         const res = await fetch('/api/convert', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url })
         });
-
-        if (!res.ok) {
-          const msg = await res.text();
-          alert("변환 실패: " + msg);
-          return;
-        }
-
+        if (!res.ok) throw new Error('변환 실패');
         const blob = await res.blob();
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = window.URL.createObjectURL(blob);
         a.download = 'post.md';
         document.body.appendChild(a);
         a.click();
         a.remove();
-      } catch (error) {
-        alert("오류 발생: " + error.message);
+      } catch (err) {
+        alert('변환 실패: ' + err.message);
       }
     }
   </script>
